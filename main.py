@@ -8,6 +8,7 @@ import os
 import smtplib
 import requests
 from bs4 import BeautifulSoup
+from playsound import playsound
 
 user = "Bryan"
 
@@ -41,6 +42,9 @@ def greeting():
 def command():
     r = sr.Recognizer()
 
+    local_dir = os.path.dirname(__file__)
+    wario_eh = os.path.join(local_dir,"sounds\\-eh_F.wav")
+
     with sr.Microphone() as source:
         print("Listening...")
         audio = r.listen(source)
@@ -51,7 +55,7 @@ def command():
             print(f"user said: {query}")
 
         except Exception as e:
-            speak("Can you repeat that?")
+            playsound(wario_eh)
             command()
 
     return query
@@ -78,18 +82,26 @@ def searchYT(text):
 
     webbrowser.open_new(link)
 
-def startJarvis():
-    speak("Initializing Jarvis...")
+def startWario():
+    #Variables for the pathnames of the different sound effects
+    local_dir = os.path.dirname(__file__)
+    wario_greeting = os.path.join(local_dir,"sounds\\WELCOME_TO_WARIO_WORLD(Stereo).wav")
+    wario_fine = os.path.join(local_dir,"sounds\\FINE.wav")
+    wario_oh_kay = os.path.join(local_dir,"sounds\\Oh-KAY(Stereo).wav")
+
+    playsound(wario_greeting)
     greeting()
     query = command()
 
     if "wikipedia" in query.lower():
+        playsound(wario_fine)
         speak("Searching Wikipedia...")
         query = query.lower().replace("wikipedia","")
         results = wikipedia.summary(query, sentences = 3)
         speak(results)
 
     elif "youtube" in query.lower():
+
         query = query.lower().replace("youtube","")
         searchYT(query)
 
@@ -105,6 +117,7 @@ def startJarvis():
         webbrowser.open("https://www.youtube.com/watch?v=jEkmWm08-Ho&list=PLkL41eK4K0zmPE2hRDhahHwmWmHEeedRn")
 
     elif "epic" in query.lower():
+        playsound(wario_oh_yeah)
         webbrowser.open("https://www.youtube.com/watch?v=dGJlZw4FYgE")
 
     elif "the time" in query.lower():
@@ -124,4 +137,4 @@ def startJarvis():
             print(e)
 
 if __name__ == "__main__":
-    startJarvis()
+    startWario()
