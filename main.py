@@ -89,6 +89,28 @@ def startWario():
     wario_fine = os.path.join(local_dir,"sounds\\FINE.wav")
     wario_oh_kay = os.path.join(local_dir,"sounds\\Oh-KAY(Stereo).wav")
 
+    #Setting up pyglet window to display and play T-MO gif
+    tmo_gif = os.path.join(local_dir,"images\\T-MO.gif")
+    ani = pyglet.image.load_animation(tmo_gif)
+    aniSprite = pyglet.sprite.Sprite(ani)
+
+    w = aniSprite.width
+    h = aniSprite.height
+
+    window = pyglet.window.Window(width=w, height=h)
+
+    r,g,b,alpha = 0.5, 0.5, 0.8, 0.5
+
+    pyglet.gl.glClearColor(r,g,b,alpha)
+
+    @window.event
+    def on_draw():
+        window.clear()
+        aniSprite.draw()
+        
+    pyglet.app.run()
+
+    #Where the audio portion begins
     playsound(wario_greeting)
     greeting()
     query = command()
@@ -137,28 +159,4 @@ def startWario():
             print(e)
 
 if __name__ == "__main__":
-
-    local_dir = os.path.dirname(__file__)
-
-    #Setting up pyglet window to display and play T-MO gif
-    ani = pyglet.image.load_animation(images\\T-MO.gif")
-    aniSprite = pyglet.sprite.Sprite(ani)
-
-    w = aniSprite.width
-    h = aniSprite.height
-
-    window = pyglet.window.Window(width=w, height=h)
-
-    r,g,b,alpha = 0.5, 0.5, 0.8, 0.5
-
-    pyglet.gl.glClearColor(r,g,b,alpha)
-
-    @window.event
-    def on_draw():
-        window.clear()
-        aniSprite.draw()
-
-    pyglet.app.run()
-
-
-    #startWario()
+    startWario()
