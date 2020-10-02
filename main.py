@@ -9,6 +9,7 @@ import smtplib
 import requests
 from bs4 import BeautifulSoup
 from playsound import playsound
+import pyglet
 
 user = "Bryan"
 
@@ -40,10 +41,9 @@ def greeting():
 
 # Listens to microphone and converts command to string
 def command():
-    r = sr.Recognizer()
-
-    local_dir = os.path.dirname(__file__)
     wario_eh = os.path.join(local_dir,"sounds\\-eh_F.wav")
+
+    r = sr.Recognizer()
 
     with sr.Microphone() as source:
         print("Listening...")
@@ -117,7 +117,7 @@ def startWario():
         webbrowser.open("https://www.youtube.com/watch?v=jEkmWm08-Ho&list=PLkL41eK4K0zmPE2hRDhahHwmWmHEeedRn")
 
     elif "epic" in query.lower():
-        playsound(wario_oh_yeah)
+        playsound(wario_oh_kay)
         webbrowser.open("https://www.youtube.com/watch?v=dGJlZw4FYgE")
 
     elif "the time" in query.lower():
@@ -137,4 +137,28 @@ def startWario():
             print(e)
 
 if __name__ == "__main__":
-    startWario()
+
+    local_dir = os.path.dirname(__file__)
+
+    #Setting up pyglet window to display and play T-MO gif
+    ani = pyglet.image.load_animation(images\\T-MO.gif")
+    aniSprite = pyglet.sprite.Sprite(ani)
+
+    w = aniSprite.width
+    h = aniSprite.height
+
+    window = pyglet.window.Window(width=w, height=h)
+
+    r,g,b,alpha = 0.5, 0.5, 0.8, 0.5
+
+    pyglet.gl.glClearColor(r,g,b,alpha)
+
+    @window.event
+    def on_draw():
+        window.clear()
+        aniSprite.draw()
+
+    pyglet.app.run()
+
+
+    #startWario()
