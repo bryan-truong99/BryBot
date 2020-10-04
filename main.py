@@ -10,6 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 from playsound import playsound
 import pyglet
+import time
 
 user = "Bryan"
 
@@ -39,26 +40,54 @@ def greeting():
 
     speak("How may I help you today?")
 
-# Listens to microphone and converts command to string
 def command():
-    wario_eh = os.path.join(local_dir,"sounds\\-eh_F.wav")
-
+    query = None
+    #Adjust threshold for speech so it does not recognize background noise
     r = sr.Recognizer()
+    r.energy_threshold = 400
+    r.dynamic_energy_threshold = False
+    # Words that sphinx should listen closely for. 0-1 is the sensitivity
+    # of the wake word.
+    keywords = [("google", 1), ("hey google", 1), ]
 
-    with sr.Microphone() as source:
-        print("Listening...")
-        audio = r.listen(source)
+    source = sr.Microphone()
 
+
+    def callback(recognizer, audio):  # this is called from the background thread
+        print("Hi")
         try:
-            print("Recognizing...")
-            query = r.recognize_google(audio)
+            speech_as_text = recognizer.recognize_sphinx(audio, keyword_entries=keywords)
+            print(f"user said: {speech_as_text}")
+
+            # Look for your "Ok Google" keyword in speech_as_text
+            if "google" in speech_as_text or "hey google":
+                recognize_main()
+
+        except sr.UnknownValueError:
+            print("Oops! Didn't catch that")
+
+
+    def recognize_main():
+        print("Recognizing Main...")
+        audio_data = r.listen(source)
+
+        # interpret the user's words however you normally interpret them
+        try:
+            query = r.recognize_google(audio_data)
             print(f"user said: {query}")
+            startWario(query)
 
-        except Exception as e:
-            playsound(wario_eh)
-            command()
+        except:
+            print("Oops! Didn't catch that")
 
-    return query
+
+    def start_recognizer():
+        print("Listening...")
+        r.listen_in_background(source, callback)
+        time.sleep(1000000)
+
+    start_recognizer()
+    
 
 #If I want to send emails use this function
 def sendEmail(to, content):
@@ -82,14 +111,8 @@ def searchYT(text):
 
     webbrowser.open_new(link)
 
-def startWario():
-    #Variables for the pathnames of the different sound effects
-    local_dir = os.path.dirname(__file__)
-    wario_greeting = os.path.join(local_dir,"sounds\\WELCOME_TO_WARIO_WORLD(Stereo).wav")
-    wario_fine = os.path.join(local_dir,"sounds\\FINE.wav")
-    wario_oh_kay = os.path.join(local_dir,"sounds\\Oh-KAY(Stereo).wav")
-
-    #Setting up pyglet window to display and play T-MO gif
+#Setting up pyglet window to display and play T-MO gif
+def displayGIF(local_dir):
     tmo_gif = os.path.join(local_dir,"images\\T-MO.gif")
     ani = pyglet.image.load_animation(tmo_gif)
     aniSprite = pyglet.sprite.Sprite(ani)
@@ -107,13 +130,19 @@ def startWario():
     def on_draw():
         window.clear()
         aniSprite.draw()
-        
+
     pyglet.app.run()
 
+def startWario(query):
+
+    #Variables for the pathnames of the different sound effects
+    wario_greeting = os.path.join(local_dir,"sounds\\WELCOME_TO_WARIO_WORLD(Stereo).wav")
+    wario_fine = os.path.join(local_dir,"sounds\\FINE.wav")
+    wario_oh_kay = os.path.join(local_dir,"sounds\\Oh-KAY(Stereo).wav")
+
     #Where the audio portion begins
-    playsound(wario_greeting)
+    #playsound(wario_greeting)
     greeting()
-    query = command()
 
     if "wikipedia" in query.lower():
         playsound(wario_fine)
@@ -158,5 +187,11 @@ def startWario():
         except Exception as e:
             print(e)
 
+    elif "play games" in query.lower():
+        os.system("emulationstation")
+
 if __name__ == "__main__":
-    startWario()
+    #Need to use threading
+    local_dir = os.path.dirname(__file__)
+    #displayGIF(local_dir)
+    command()
