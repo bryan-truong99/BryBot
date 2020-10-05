@@ -11,83 +11,43 @@ from bs4 import BeautifulSoup
 from playsound import playsound
 import pyglet
 import time
+import threading
 
 user = "Bryan"
 
-# Setting up text-to-speech voice and speaking rate
-engine = pyttsx3.init()
-voices = engine.getProperty("voices")
-rate = engine.getProperty("rate")
+#Text to speech class utilized in order to get around the hang time that it has by default
+class TTS():
+    # Setting up text-to-speech voice and speaking rate
+    engine = None
+    voices = None
+    rate = None
 
-engine.setProperty("voice", voices[0].id)
-engine.setProperty("rate", 200)
+    def __init__(self):
+        self.engine = pyttsx3.init()
+        self.voices = self.engine.getProperty("voices")
+        self.rate = self.engine.getProperty("rate")
+        self.engine.setProperty("voice", self.voices[1].id)
+        self.engine.setProperty("rate", 200)
+    # Converts text to speech and reads aloud the text put into the function
+    def speak(self, text):
+        self.engine.say(text)
+        self.engine.runAndWait()
 
-# Converts text to speech and reads aloud the text put into the function
-def speak(text):
-    engine.say(text)
-    engine.runAndWait()
-
-# Greets user based on the time of the day
+###########################################
+#Greets user based on the time of the day
 def greeting():
+    tts = TTS()
     hour = int(datetime.datetime.now().hour)
 
     if hour > 0 and hour < 12:
-        speak("Good Morning" + user)
+        tts.speak("Good Morning" + user)
     elif hour >= 12 and hour < 18:
-        speak("Good Afternoon" + user)
+        tts.speak("Good Afternoon" + user)
     else:
-        speak("Good Evening" + user)
+        tts.speak("Good Evening" + user)
 
-    speak("How may I help you today?")
-
-def command():
-    query = None
-    #Adjust threshold for speech so it does not recognize background noise
-    r = sr.Recognizer()
-    r.energy_threshold = 400
-    r.dynamic_energy_threshold = False
-    # Words that sphinx should listen closely for. 0-1 is the sensitivity
-    # of the wake word.
-    keywords = [("google", 1), ("hey google", 1), ]
-
-    source = sr.Microphone()
-
-
-    def callback(recognizer, audio):  # this is called from the background thread
-        print("Hi")
-        try:
-            speech_as_text = recognizer.recognize_sphinx(audio, keyword_entries=keywords)
-            print(f"user said: {speech_as_text}")
-
-            # Look for your "Ok Google" keyword in speech_as_text
-            if "google" in speech_as_text or "hey google":
-                recognize_main()
-
-        except sr.UnknownValueError:
-            print("Oops! Didn't catch that")
-
-
-    def recognize_main():
-        print("Recognizing Main...")
-        audio_data = r.listen(source)
-
-        # interpret the user's words however you normally interpret them
-        try:
-            query = r.recognize_google(audio_data)
-            print(f"user said: {query}")
-            startWario(query)
-
-        except:
-            print("Oops! Didn't catch that")
-
-
-    def start_recognizer():
-        print("Listening...")
-        r.listen_in_background(source, callback)
-        time.sleep(1000000)
-
-    start_recognizer()
-    
+    tts.speak("How may I help you today?")
+    del(tts)
 
 #If I want to send emails use this function
 def sendEmail(to, content):
@@ -99,6 +59,7 @@ def sendEmail(to, content):
     server.close
 
 #Searches youtube and opens the first result
+#WIP
 def searchYT(text):
     words = text.split()
     url = "http://www.youtube.com/results?search_query=" + "+".join(words)
@@ -134,22 +95,22 @@ def displayGIF(local_dir):
     pyglet.app.run()
 
 def startWario(query):
-
     #Variables for the pathnames of the different sound effects
-    wario_greeting = os.path.join(local_dir,"sounds\\WELCOME_TO_WARIO_WORLD(Stereo).wav")
-    wario_fine = os.path.join(local_dir,"sounds\\FINE.wav")
-    wario_oh_kay = os.path.join(local_dir,"sounds\\Oh-KAY(Stereo).wav")
+    # wario_greeting = os.path.join(local_dir,"sounds\\WELCOME_TO_WARIO_WORLD(Stereo).wav")
+    # wario_fine = os.path.join(local_dir,"sounds\\FINE.wav")
+    # wario_oh_kay = os.path.join(local_dir,"sounds\\Oh-KAY(Stereo).wav")
+
+    text_speech = TTS()
 
     #Where the audio portion begins
     #playsound(wario_greeting)
-    greeting()
 
     if "wikipedia" in query.lower():
-        playsound(wario_fine)
-        speak("Searching Wikipedia...")
+        # playsound(wario_fine)
+        text_speech.speak("Searching Wikipedia...")
         query = query.lower().replace("wikipedia","")
         results = wikipedia.summary(query, sentences = 3)
-        speak(results)
+        text_speech.speak(results)
 
     elif "youtube" in query.lower():
 
@@ -168,12 +129,12 @@ def startWario(query):
         webbrowser.open("https://www.youtube.com/watch?v=jEkmWm08-Ho&list=PLkL41eK4K0zmPE2hRDhahHwmWmHEeedRn")
 
     elif "epic" in query.lower():
-        playsound(wario_oh_kay)
+        # playsound(wario_oh_kay)
         webbrowser.open("https://www.youtube.com/watch?v=dGJlZw4FYgE")
 
     elif "the time" in query.lower():
         time = datetime.datetime.now().strftime("%H:%M:%S")
-        speak(f"{user}, the time is {time}")
+        text_speech.speak(f"{user}, the time is {time}")
 
     elif "send email" in query.lower():
         try:
@@ -190,8 +151,62 @@ def startWario(query):
     elif "play games" in query.lower():
         os.system("emulationstation")
 
+    del(text_speech)
+
+def command():
+    query = None
+    #Adjust threshold for speech so it does not recognize background noise
+    r = sr.Recognizer()
+    r.energy_threshold = 400
+    r.dynamic_energy_threshold = False
+    # Words that sphinx should listen closely for. 0-1 is the sensitivity
+    # of the wake word.
+    keywords = [("google", 1), ("hey google", 1), ]
+
+    source = sr.Microphone()
+
+    def callback(recognizer, audio):  # this is called from the background thread
+        print("Hi")
+        try:
+            speech_as_text = recognizer.recognize_sphinx(audio, keyword_entries=keywords)
+            print(f"user said: {speech_as_text}")
+
+            # Look for your "Ok Google" keyword in speech_as_text
+            if "google" in speech_as_text or "hey google":
+                greeting()
+                recognize_main()
+
+        except sr.UnknownValueError:
+            print("Oops! Didn't catch that")
+
+
+    def recognize_main():
+        print("Recognizing Main...")
+        audio_data = r.listen(source)
+
+        # interpret the user's words however you normally interpret them
+        try:
+            query = r.recognize_google(audio_data)
+            print(f"user said: {query}")
+            startWario(query)
+
+        except:
+            print("Oops! Didn't catch that")
+
+
+    def start_recognizer():
+        print("Listening...")
+        r.listen_in_background(source, callback)
+        time.sleep(1000000)
+
+    start_recognizer()
+
 if __name__ == "__main__":
-    #Need to use threading
     local_dir = os.path.dirname(__file__)
-    #displayGIF(local_dir)
-    command()
+
+    #Use threading to execute both functions
+    x = threading.Thread(target=displayGIF, args=(local_dir,),daemon=True)
+    y = threading.Thread(target=command, args=())
+
+    x.start()
+    y.start()
