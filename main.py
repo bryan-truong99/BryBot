@@ -8,10 +8,10 @@ import os
 import smtplib
 import requests
 from bs4 import BeautifulSoup
-from playsound import playsound
 import pyglet
 import time
 import threading
+#from playsound import playsound
 
 user = "Bryan"
 
@@ -94,7 +94,7 @@ def displayGIF(local_dir):
 
     pyglet.app.run()
 
-def startWario(query):
+def startBryBot(query):
     #Variables for the pathnames of the different sound effects
     # wario_greeting = os.path.join(local_dir,"sounds\\WELCOME_TO_WARIO_WORLD(Stereo).wav")
     # wario_fine = os.path.join(local_dir,"sounds\\FINE.wav")
@@ -153,6 +153,7 @@ def startWario(query):
 
     del(text_speech)
 
+#Continuous speech recognition using sphinx and google api
 def command():
     query = None
     #Adjust threshold for speech so it does not recognize background noise
@@ -188,7 +189,7 @@ def command():
         try:
             query = r.recognize_google(audio_data)
             print(f"user said: {query}")
-            startWario(query)
+            startBryBot(query)
 
         except:
             print("Oops! Didn't catch that")
