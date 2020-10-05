@@ -11,6 +11,8 @@ from bs4 import BeautifulSoup
 import pyglet
 import time
 import threading
+import urllib.request
+import re
 #from playsound import playsound
 
 user = "Bryan"
@@ -61,14 +63,10 @@ def sendEmail(to, content):
 #Searches youtube and opens the first result
 #WIP
 def searchYT(text):
-    words = text.split()
-    url = "http://www.youtube.com/results?search_query=" + "+".join(words)
-    search_result = requests.get(url).text
-    soup = BeautifulSoup(search_result, "html.parser")
-    videos = soup.select(".ytd-video-renderer")
-    if not videos:
-        raise KeyError("No video found")
-    link = "https://www.youtube.com" + videos[0]["href"]
+    search_keyword = text.replace(" ", "+")
+    html = urllib.request.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
+    video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
+    link = "https://www.youtube.com/watch?v=" + video_ids[0]
 
     webbrowser.open_new(link)
 
