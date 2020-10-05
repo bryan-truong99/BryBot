@@ -111,7 +111,6 @@ def startBryBot(query):
         text_speech.speak(results)
 
     elif "youtube" in query.lower():
-
         query = query.lower().replace("youtube","")
         searchYT(query)
 
