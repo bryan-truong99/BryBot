@@ -11,9 +11,10 @@ from bs4 import BeautifulSoup
 import pyglet
 import time
 import threading
-import urllib.request
+from urllib.request import urlopen
 import re
-#from playsound import playsound
+import sys
+from playsound import playsound
 
 user = "Bryan"
 
@@ -64,11 +65,15 @@ def sendEmail(to, content):
 #WIP
 def searchYT(text):
     search_keyword = text.replace(" ", "+")
-    html = urllib.request.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
+    html = urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
     video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
     link = "https://www.youtube.com/watch?v=" + video_ids[0]
 
     webbrowser.open_new(link)
+
+def searchGoogle(text):
+    search_keyword = text.replace(" ","+")
+    webbrowser.open("https://www.google.com/search?q=" + search_keyword)
 
 #Setting up pyglet window to display and play T-MO gif
 def displayGIF(local_dir):
@@ -93,15 +98,10 @@ def displayGIF(local_dir):
     pyglet.app.run()
 
 def startBryBot(query):
-    #Variables for the pathnames of the different sound effects
-    # wario_greeting = os.path.join(local_dir,"sounds\\WELCOME_TO_WARIO_WORLD(Stereo).wav")
-    # wario_fine = os.path.join(local_dir,"sounds\\FINE.wav")
-    # wario_oh_kay = os.path.join(local_dir,"sounds\\Oh-KAY(Stereo).wav")
 
     text_speech = TTS()
 
     #Where the audio portion begins
-    #playsound(wario_greeting)
 
     if "wikipedia" in query.lower():
         # playsound(wario_fine)
@@ -111,22 +111,22 @@ def startBryBot(query):
         text_speech.speak(results)
 
     elif "youtube" in query.lower():
+        text_speech.speak("On it")
         query = query.lower().replace("youtube","")
         searchYT(query)
 
-    elif "open google" in query.lower():
-        webbrowser.open("google.com")
+    elif "google" in query.lower():
+        text_speech.speak("I got you, homie")
+        query = query.lower().replace("google","")
+        searchGoogle(query)
 
     elif "play music" in query.lower():
         song_dir= "C:\\Users\\bryan\\Music".encode("utf-8")
         songs = os.listdir(song_dir)
         os.startfile(os.path.join(song_dir,songs[1]))
 
-    elif "whole lotta red" in query.lower():
-        webbrowser.open("https://www.youtube.com/watch?v=jEkmWm08-Ho&list=PLkL41eK4K0zmPE2hRDhahHwmWmHEeedRn")
-
     elif "epic" in query.lower():
-        # playsound(wario_oh_kay)
+        text_speech.speak("Hell Yeah!")
         webbrowser.open("https://www.youtube.com/watch?v=dGJlZw4FYgE")
 
     elif "the time" in query.lower():
@@ -147,8 +147,25 @@ def startBryBot(query):
 
     elif "play games" in query.lower():
         os.system("emulationstation")
+        sys.exit(0)
+
+    elif "tell me a joke" in query.lower():
+        text_speech.speak("Yo momma")
+
+    elif "song" in query.lower():
+        text_speech.speak("")
+
+    elif "thank you" in query.lower():
+        text_speech.speak("You're welcome" + user)
+    elif "close windows" in query.lower():
+        os.system("taskkill /im chrome.exe /f")
+
+    elif "turn off" in query.lower():
+        text_speech.speak("Goodbye" + user)
+        os.system("shutdown /s /t 1")
 
     del(text_speech)
+
 
 #Continuous speech recognition using sphinx and google api
 def command():
@@ -159,7 +176,7 @@ def command():
     r.dynamic_energy_threshold = False
     # Words that sphinx should listen closely for. 0-1 is the sensitivity
     # of the wake word.
-    keywords = [("google", 1), ("hey google", 1), ]
+    keywords = [("senna", 1), ("hey senna", 1), ]
 
     source = sr.Microphone()
 
@@ -201,7 +218,7 @@ def command():
 
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
-
+    playsound(os.path.join(local_dir,"sounds\\pokemon-red_blue_yellow-item-found-sound-effect.mp3"))
     #Use threading to execute both functions
     x = threading.Thread(target=displayGIF, args=(local_dir,),daemon=True)
     y = threading.Thread(target=command, args=())
