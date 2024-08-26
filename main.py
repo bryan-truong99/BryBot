@@ -172,7 +172,7 @@ def command(brybot):
             audio_data = r.listen(source)
             query = r.recognize_google(audio_data)
             print(f"user said: {query}")
-            brybot.startbryBot(query)
+            brybot.start_bry_bot(query)
         except sr.RequestError as e:
             print(f"Request error; {e}")
         except sr.UnknownValueError:
