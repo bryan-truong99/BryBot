@@ -151,7 +151,7 @@ def command(brybot):
     r.dynamic_energy_threshold = False
     # Words that sphinx should listen closely for. 0-1 is the sensitivity
     # of the wake word.
-    keywords = [("brybot", 1), ("hey brybot", 1), ]
+    keywords = [("bob", 1), ("hey bob", 1), ]
 
     source = sr.Microphone()
 
@@ -161,7 +161,7 @@ def command(brybot):
             print(f"user said: {speech_as_text}")
 
             # Look for your "Ok Google" keyword in speech_as_text
-            if "brybot" in speech_as_text or "hey brybot":
+            if "bob" in speech_as_text or "hey bob":
                 brybot.greeting()
                 recognize_main()
 
