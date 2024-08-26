@@ -25,6 +25,17 @@ class TTS():
     def __init__(self):
         self.engine = pyttsx3.init()
         self.voices = self.engine.getProperty("voices")
+
+        for i, voice in enumerate(self.voices):
+            print(f"Voice {i}:")
+            print(f" - ID: {voice.id}")
+            print(f" - Name: {voice.name}")
+            print(f" - Languages: {voice.languages}")
+            print(f" - Gender: {voice.gender}")
+            print(f" - Age: {voice.age}")
+            print()
+
+
         self.rate = self.engine.getProperty("rate")
         self.engine.setProperty("voice", self.voices[1].id)
         self.engine.setProperty("rate", 200)
@@ -140,7 +151,7 @@ def command(brybot):
     r.dynamic_energy_threshold = False
     # Words that sphinx should listen closely for. 0-1 is the sensitivity
     # of the wake word.
-    keywords = [("senna", 1), ("hey senna", 1), ]
+    keywords = [("brybot", 1), ("hey brybot", 1), ]
 
     source = sr.Microphone()
 
